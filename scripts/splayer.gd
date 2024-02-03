@@ -1,27 +1,27 @@
 extends CharacterBody2D
 
-@export var speed: = 500.0;
-@export var maxSpeed: = 625.0;
-@export var jumpForce: = 1450.0;
-@export var slip: = 0.05;
-@onready var animationPlayer: = $AnimationPlayer;
+@export_range(0.0, 10.0, 0.1) var speed: = 5.0;
+@export_range(0.0, 10.0, 0.1) var maxSpeed: = 6.0;
+@export_range(0.0, 10.0, 0.1) var jumpForce: = 6.0;
+@export_range(0.05, 1.0, 0.01) var friction: = 0.05;
 
-@export var gravityScale: = 3.5;
-var gravity = gravityScale * ProjectSettings.get_setting("physics/2d/default_gravity")
+@export_range(0.0, 10.0, 0.1) var gravity: = 3.5;
+
+func _ready():
+	speed *= 10;
+	maxSpeed *= 10;
+	jumpForce *= 20;
+	gravity *= 98;
 
 func _physics_process(delta):
 
 	# Get the input direction and handle the movement/deceleration.
 	var direction = Input.get_axis("move_left", "move_right");
-	$Sprite2D.flip_h = direction == -1;
 	
 	if direction:
-		animationPlayer.play("walk");
-		velocity.x += direction * speed * slip;
+		velocity.x += direction * speed * friction;
 	else:
-		if is_on_floor():
-			animationPlayer.play("idle");
-		velocity.x = move_toward(velocity.x, 0, speed * slip);
+		velocity.x = move_toward(velocity.x, 0, speed * friction);
 	
 	# Add the gravity.
 	if not is_on_floor():
@@ -29,7 +29,6 @@ func _physics_process(delta):
 	
 	# Handle Jump.
 	if Input.is_action_just_pressed("jump") and is_on_floor():
-		animationPlayer.play("jump");
 		velocity.y = jumpForce * -1;
 	
 	if direction == 1:
